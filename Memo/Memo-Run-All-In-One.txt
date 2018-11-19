@@ -1,0 +1,380 @@
+Quick setup and test
+1. Setup CA Server & setup all of the identities
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+$ ./run-all-caserver.sh
+
+2. Generate configuration and launch Oderer
+vagrant@vagrant:/vagrant$ cd orderer/bins/
+$ ./run-all-orderer.sh
+
+3. Create the airlinechannel and launch peers
+vagrant@vagrant:/vagrant$ cd peers/bins/
+$ ./run-all-peers.sh
+
+4. Test
+vagrant@vagrant:/vagrant/peers/bins$ . set-env.sh acme 7050 admin
+	Current Identity Context:
+	Switching IDENTITY Context to Org = acme  admin
+	Setting PORT_NUMBER_BASE=7050
+s$ ./chain-test.sh install
+$ ./chain-test.sh instantiate
+	(Note that can be time-out and we need to re-execute the command)
+$ peer chaincode list --instantiated -C airlinechannel
+	Get instantiated chaincodes on channel airlinechannel:
+	Name: nodecc, Version: 1.0, Path: ../../nodechaincode, Escc: escc, Vscc: vscc
+$ ./chain-test.sh query
+$ ./chain-test.sh invoke
+$ ./chain-test.sh query
+
+Clean up:
+At component level or At Workbench level
+./setup/clean.sh
+vagrant@vagrant:/vagrant$ cd setup
+$ ./clean.sh
+
+--- Detail log:
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+vagrant@vagrant:/vagrant/fabric-ca/bins$ ./run-all-caserver.sh
+++++++Starting Fabric CA Initialization
+fabric-ca-server: no process found
+2018/11/18 06:12:06 [INFO] Created default configuration file at /vagrant/fabric-ca/server/fabric-ca-server-config.yaml
+2018/11/18 06:12:06 [INFO] Server Version: 1.3.1
+2018/11/18 06:12:06 [INFO] Server Levels: &{Identity:1 Affiliation:1 Certificate:1 Credential:1 RAInfo:1 Nonce:1}
+2018/11/18 06:12:06 [WARNING] &{69 The specified CA certificate file /vagrant/fabric-ca/server/ca-cert.pem does not exist}
+2018/11/18 06:12:06 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:06 [INFO] encoded CSR
+2018/11/18 06:12:06 [INFO] signed certificate with serial number 661847451891776143272220229092946965458743859040
+2018/11/18 06:12:06 [INFO] The CA key and certificate were generated for CA ca.server.com
+2018/11/18 06:12:06 [INFO] The key was stored by BCCSP provider 'SW'
+2018/11/18 06:12:06 [INFO] The certificate is at: /vagrant/fabric-ca/server/ca-cert.pem
+2018/11/18 06:12:06 [INFO] Initialized sqlite3 database at /vagrant/fabric-ca/server/fabric-ca-server.db
+2018/11/18 06:12:06 [INFO] The issuer key was successfully stored. The public key is at: /vagrant/fabric-ca/server/IssuerPublicKey, secret key
+is at: /vagrant/fabric-ca/server/msp/keystore/IssuerSecretKey
+2018/11/18 06:12:06 [INFO] Idemix issuer revocation public and secret keys were generated for CA 'ca.server.com'
+2018/11/18 06:12:06 [INFO] The revocation key was successfully stored. The public key is at: /vagrant/fabric-ca/server/IssuerRevocationPublicKey, private key is at: /vagrant/fabric-ca/server/msp/keystore/IssuerRevocationPrivateKey
+2018/11/18 06:12:06 [INFO] Home directory for default CA: /vagrant/fabric-ca/server
+2018/11/18 06:12:06 [INFO] Initialization was successful
+2018/11/18 06:12:06 [INFO] Configuration file location: /vagrant/fabric-ca/server/fabric-ca-server-config.yaml
+2018/11/18 06:12:06 [INFO] Starting server in home directory: /vagrant/fabric-ca/server
+2018/11/18 06:12:06 [INFO] Server Version: 1.3.1
+2018/11/18 06:12:06 [INFO] Server Levels: &{Identity:1 Affiliation:1 Certificate:1 Credential:1 RAInfo:1 Nonce:1}
+2018/11/18 06:12:06 [INFO] The CA key and certificate already exist
+2018/11/18 06:12:06 [INFO] The key is stored by BCCSP provider 'SW'
+2018/11/18 06:12:06 [INFO] The certificate is at: /vagrant/fabric-ca/server/ca-cert.pem
+2018/11/18 06:12:07 [INFO] Initialized sqlite3 database at /vagrant/fabric-ca/server/fabric-ca-server.db
+2018/11/18 06:12:07 [INFO] The Idemix issuer public and secret key files already exist
+2018/11/18 06:12:07 [INFO]    secret key file location: /vagrant/fabric-ca/server/msp/keystore/IssuerSecretKey
+2018/11/18 06:12:07 [INFO]    public key file location: /vagrant/fabric-ca/server/IssuerPublicKey
+2018/11/18 06:12:07 [INFO] The Idemix issuer revocation public and secret key files already exist
+2018/11/18 06:12:07 [INFO]    private key file location: /vagrant/fabric-ca/server/msp/keystore/IssuerRevocationPrivateKey
+2018/11/18 06:12:07 [INFO]    public key file location: /vagrant/fabric-ca/server/IssuerRevocationPublicKey
+2018/11/18 06:12:07 [INFO] Home directory for default CA: /vagrant/fabric-ca/server
+2018/11/18 06:12:07 [INFO] Listening on http://0.0.0.0:7054
+Copying the ../../config/fabric-ca-client-config.yaml to /vagrant/fabric-ca/bins/../client/caserver/admin!!!
+cp: cannot stat '../../config/fabric-ca-client-config.yaml': No such file or directory
+2018/11/18 06:12:11 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/caserver/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:11 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:11 [INFO] encoded CSR
+2018/11/18 06:12:12 [INFO] signed certificate with serial number 490788816706817428716438892074622375584256358097
+2018/11/18 06:12:12 [INFO] [::1]:40558 POST /enroll 201 0 "OK"
+2018/11/18 06:12:12 [INFO] Stored client certificate at /vagrant/fabric-ca/client/caserver/admin/msp/signcerts/cert.pem
+2018/11/18 06:12:12 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/caserver/admin/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:12 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/caserver/admin/msp/IssuerPublicKey
+2018/11/18 06:12:12 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/caserver/admin/msp/IssuerRevocationPublicKey
+CA Server Re-Initialized !!!
++++++Launching CA Server - Sleeping for 3 sec
+2018/11/18 06:12:12 [INFO] Configuration file location: /vagrant/fabric-ca/server/fabric-ca-server-config.yaml
+2018/11/18 06:12:12 [INFO] Starting server in home directory: /vagrant/fabric-ca/server
+2018/11/18 06:12:12 [INFO] Server Version: 1.3.1
+2018/11/18 06:12:12 [INFO] Server Levels: &{Identity:1 Affiliation:1 Certificate:1 Credential:1 RAInfo:1 Nonce:1}
+2018/11/18 06:12:12 [INFO] The CA key and certificate already exist
+2018/11/18 06:12:12 [INFO] The key is stored by BCCSP provider 'SW'
+2018/11/18 06:12:12 [INFO] The certificate is at: /vagrant/fabric-ca/server/ca-cert.pem
+2018/11/18 06:12:12 [INFO] Initialized sqlite3 database at /vagrant/fabric-ca/server/fabric-ca-server.db
+2018/11/18 06:12:12 [INFO] The Idemix issuer public and secret key files already exist
+2018/11/18 06:12:12 [INFO]    secret key file location: /vagrant/fabric-ca/server/msp/keystore/IssuerSecretKey
+2018/11/18 06:12:12 [INFO]    public key file location: /vagrant/fabric-ca/server/IssuerPublicKey
+2018/11/18 06:12:12 [INFO] The Idemix issuer revocation public and secret key files already exist
+2018/11/18 06:12:12 [INFO]    private key file location: /vagrant/fabric-ca/server/msp/keystore/IssuerRevocationPrivateKey
+2018/11/18 06:12:12 [INFO]    public key file location: /vagrant/fabric-ca/server/IssuerRevocationPublicKey
+2018/11/18 06:12:12 [INFO] Home directory for default CA: /vagrant/fabric-ca/server
+2018/11/18 06:12:12 [INFO] Listening on http://0.0.0.0:7054
+++++Creating the Admin identites for the orgs
+========= Registering ======================== Registering ===============
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/caserver/admin
+Registering: orderer-admin
+2018/11/18 06:12:15 [INFO] Configuration file location: /vagrant/fabric-ca/client/caserver/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:15 [INFO] [::1]:40560 POST /register 201 0 "OK"2018/11/18 06:12:15 [INFO] [::1]:40560 POST /register 201 0 "OK"
+Password: pw
+Registering: acme-admin
+2018/11/18 06:12:15 [INFO] Configuration file location: /vagrant/fabric-ca/client/caserver/admin/fabric-ca-client-config.yaml2018/11/18 06:12:15 [INFO] Configuration file location: /vagrant/fabric-ca/client/caserver/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:15 [INFO] [::1]:40562 POST /register 201 0 "OK"2018/11/18 06:12:15 [INFO] [::1]:40562 POST /register 201 0 "OK"
+Password: pw
+Registering: budget-admin
+2018/11/18 06:12:15 [INFO] Configuration file location: /vagrant/fabric-ca/client/caserver/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:15 [INFO] [::1]:40564 POST /register 201 0 "OK"
+Password: pw
+========= Enrolling ===============
+Enrolling: orderer-admin
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/orderer/admin
+2018/11/18 06:12:15 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/orderer/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:15 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:15 [INFO] encoded CSR
+2018/11/18 06:12:16 [INFO] signed certificate with serial number 653023348522096748875565859183946641294692897224
+2018/11/18 06:12:16 [INFO] [::1]:40566 POST /enroll 201 0 "OK"
+2018/11/18 06:12:16 [INFO] Stored client certificate at /vagrant/fabric-ca/client/orderer/admin/msp/signcerts/cert.pem
+2018/11/18 06:12:16 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/orderer/admin/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:16 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/orderer/admin/msp/IssuerPublicKey
+2018/11/18 06:12:16 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/orderer/admin/msp/IssuerRevocationPublicKey
+====> /vagrant/fabric-ca/bins/../client/orderer/admin/msp/admincerts
+Enrolling: acme-admin
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/admin
+2018/11/18 06:12:16 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/acme/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:16 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:16 [INFO] encoded CSR
+2018/11/18 06:12:16 [INFO] signed certificate with serial number 516222385060902516603452035506953262234378422237
+2018/11/18 06:12:16 [INFO] [::1]:40568 POST /enroll 201 0 "OK"
+2018/11/18 06:12:16 [INFO] Stored client certificate at /vagrant/fabric-ca/client/acme/admin/msp/signcerts/cert.pem
+2018/11/18 06:12:16 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/acme/admin/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:16 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/acme/admin/msp/IssuerPublicKey
+2018/11/18 06:12:16 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/acme/admin/msp/IssuerRevocationPublicKey
+====> /vagrant/fabric-ca/bins/../client/acme/admin/msp/admincerts
+Enrolling: budget-admin
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/budget/admin
+2018/11/18 06:12:16 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/budget/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:16 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:16 [INFO] encoded CSR
+2018/11/18 06:12:16 [INFO] signed certificate with serial number 626402578905732731154476908881917292755419390086
+2018/11/18 06:12:16 [INFO] [::1]:40570 POST /enroll 201 0 "OK"
+2018/11/18 06:12:16 [INFO] Stored client certificate at /vagrant/fabric-ca/client/budget/admin/msp/signcerts/cert.pem
+2018/11/18 06:12:16 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/budget/admin/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:16 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/budget/admin/msp/IssuerPublicKey
+2018/11/18 06:12:16 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/budget/admin/msp/IssuerRevocationPublicKey
+====> /vagrant/fabric-ca/bins/../client/budget/admin/msp/admincerts
+===================================
++++Setting up the organization MSP(s)
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/orderer/admin
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/admin
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/budget/admin
+Created MSP for all Organizations!!!
+++Creating the Orderer Identity
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/orderer/admin
+2018/11/18 06:12:16 [INFO] Configuration file location: /vagrant/fabric-ca/client/orderer/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:16 [INFO] [::1]:40572 POST /register 201 0 "OK"
+Password: pw
+======Completed: Registered orderer (can be done only once)====
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/orderer/orderer
+2018/11/18 06:12:17 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/orderer/orderer/fabric-ca-client-config.yaml
+2018/11/18 06:12:17 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:17 [INFO] encoded CSR
+2018/11/18 06:12:17 [INFO] signed certificate with serial number 223390079477104390905990696446416669618514560439
+2018/11/18 06:12:17 [INFO] [::1]:40574 POST /enroll 201 0 "OK"
+2018/11/18 06:12:17 [INFO] Stored client certificate at /vagrant/fabric-ca/client/orderer/orderer/msp/signcerts/cert.pem
+2018/11/18 06:12:17 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/orderer/orderer/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:17 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/orderer/orderer/msp/IssuerPublicKey
+2018/11/18 06:12:17 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/orderer/orderer/msp/IssuerRevocationPublicKey
+======Completed: Enrolled orderer ========
+======Completed: MSP setup for the orderer========
++Creating the 3 Peer Identities
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/admin
+2018/11/18 06:12:17 [INFO] Configuration file location: /vagrant/fabric-ca/client/acme/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:17 [INFO] [::1]:40576 POST /register 201 0 "OK"
+Password: pw
+======Completed: Step 1 : Registered peer (can be done only once)====
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/acme-peer1
+2018/11/18 06:12:17 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/acme/acme-peer1/fabric-ca-client-config.yaml
+2018/11/18 06:12:17 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:17 [INFO] encoded CSR
+2018/11/18 06:12:17 [INFO] signed certificate with serial number 361565146003754778762168896872965951245493096107
+2018/11/18 06:12:17 [INFO] [::1]:40578 POST /enroll 201 0 "OK"
+2018/11/18 06:12:17 [INFO] Stored client certificate at /vagrant/fabric-ca/client/acme/acme-peer1/msp/signcerts/cert.pem
+2018/11/18 06:12:17 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/acme/acme-peer1/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:17 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/acme/acme-peer1/msp/IssuerPublicKey
+2018/11/18 06:12:17 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/acme/acme-peer1/msp/IssuerRevocationPublicKey
+======Completed: Step 3 : Enrolled acme-peer1 ========
+======Completed: Step 4 : MSP setup for the peer========
+======Peer identity setup with Enrollment ID=acme-peer1
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/admin
+2018/11/18 06:12:17 [INFO] Configuration file location: /vagrant/fabric-ca/client/acme/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:17 [INFO] [::1]:40580 POST /register 201 0 "OK"
+Password: pw
+======Completed: Step 1 : Registered peer (can be done only once)====
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/acme-peer2
+2018/11/18 06:12:18 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/acme/acme-peer2/fabric-ca-client-config.yaml
+2018/11/18 06:12:18 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:18 [INFO] encoded CSR
+2018/11/18 06:12:18 [INFO] signed certificate with serial number 688600199103269983820382003110521360742309228433
+2018/11/18 06:12:18 [INFO] [::1]:40582 POST /enroll 201 0 "OK"
+2018/11/18 06:12:18 [INFO] Stored client certificate at /vagrant/fabric-ca/client/acme/acme-peer2/msp/signcerts/cert.pem
+2018/11/18 06:12:18 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/acme/acme-peer2/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:18 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/acme/acme-peer2/msp/IssuerPublicKey
+2018/11/18 06:12:18 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/acme/acme-peer2/msp/IssuerRevocationPublicKey
+======Completed: Step 3 : Enrolled acme-peer2 ========
+======Completed: Step 4 : MSP setup for the peer========
+======Peer identity setup with Enrollment ID=acme-peer2
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/budget/admin
+2018/11/18 06:12:18 [INFO] Configuration file location: /vagrant/fabric-ca/client/budget/admin/fabric-ca-client-config.yaml
+2018/11/18 06:12:18 [INFO] [::1]:40584 POST /register 201 0 "OK"
+Password: pw
+======Completed: Step 1 : Registered peer (can be done only once)====
+FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/budget/budget-peer1
+2018/11/18 06:12:18 [INFO] Created a default configuration file at /vagrant/fabric-ca/client/budget/budget-peer1/fabric-ca-client-config.yaml
+2018/11/18 06:12:18 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 06:12:18 [INFO] encoded CSR
+2018/11/18 06:12:18 [INFO] signed certificate with serial number 366278706022610234950679076078817858679082921428
+2018/11/18 06:12:18 [INFO] [::1]:40586 POST /enroll 201 0 "OK"
+2018/11/18 06:12:18 [INFO] Stored client certificate at /vagrant/fabric-ca/client/budget/budget-peer1/msp/signcerts/cert.pem
+2018/11/18 06:12:18 [INFO] Stored root CA certificate at /vagrant/fabric-ca/client/budget/budget-peer1/msp/cacerts/localhost-7054.pem
+2018/11/18 06:12:18 [INFO] Stored Issuer public key at /vagrant/fabric-ca/client/budget/budget-peer1/msp/IssuerPublicKey
+2018/11/18 06:12:18 [INFO] Stored Issuer revocation public key at /vagrant/fabric-ca/client/budget/budget-peer1/msp/IssuerRevocationPublicKey
+======Completed: Step 3 : Enrolled budget-peer1 ========
+======Completed: Step 4 : MSP setup for the peer========
+======Peer identity setup with Enrollment ID=budget-peer1
+Done. Launch CA Server using ./launch-caserver.sh
+./launch-caserver.sh: line 7:  2981 Terminated              fabric-ca-server -n ca.server.com start
+vagrant@vagrant:/vagrant/fabric-ca/bins$ cd ..
+vagrant@vagrant:/vagrant/fabric-ca$ cd ..
+vagrant@vagrant:/vagrant$ cd orderer/bins/
+vagrant@vagrant:/vagrant/orderer/bins$ ./run-all-orderer.sh
++++Cleaning the previous run
+Done.
+To Relaunch execute ./gen-config.sh and then ./launch-orderer.sh
+++Generating the network configuration
+2018-11-18 06:14:14.996 UTC [common/tools/configtxgen] main -> INFO 001 Loading configuration
+2018-11-18 06:14:15.181 UTC [common/tools/configtxgen] doOutputBlock -> INFO 002 Generating genesis block
+2018-11-18 06:14:15.182 UTC [common/tools/configtxgen] doOutputBlock -> INFO 003 Writing genesis block
+2018-11-18 06:14:15.247 UTC [common/tools/configtxgen] main -> INFO 001 Loading configuration
+2018-11-18 06:14:15.355 UTC [common/tools/configtxgen] doOutputChannelCreateTx -> INFO 002 Generating new channel configtx
+2018-11-18 06:14:15.374 UTC [common/tools/configtxgen] doOutputChannelCreateTx -> INFO 003 Writing new channel tx
++Launching orderer in the background
+Done. Orderer started in a clean state. Check logs at orderer/orderer.log
+vagrant@vagrant:/vagrant/orderer/bins$ cd ../..
+vagrant@vagrant:/vagrant$ cd peers/bins/
+vagrant@vagrant:/vagrant/peers/bins$ ./run-all-peers.sh
+++++++ Cleaning the previous run
+Done.
++++++ Creating the application channel = airlinechannel
+Current Identity Context:
+Switching IDENTITY Context to Org = acme  admin
+Setting PORT_NUMBER_BASE=7050
+create-channel.sh   [ORDERER_ADDRESS default=7050] [CHANNEL_NAME default=airlinechannel] [CHANNEL_TX_FILE default=../../artefacts/airline-channel.tx]
+                    Make sure to execute . set-env.sh before calling this scripy
+Using ORDERER_ADDRESS=localhost:7050
+2018-11-18 06:15:00.968 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:01.044 UTC [cli/common] readBlock -> INFO 002 Received block: 0
+++++ Sleeping for 3 seconds
++++ acme-peer1 Launching & Joining airlinechannel - will sleep for 3 seconds
+Current Identity Context: acme     admin
+Switching IDENTITY Context to Org = acme  admin
+Setting PORT_NUMBER_BASE=7050
+Current Identity Context: acme     admin
+Switching IDENTITY Context to Org = acme  acme-peer1
+Setting PORT_NUMBER_BASE=7050
+====>PLEASE Check Peer Log under  ../acme-peer1.log
+====>Make sure there are no errors!!!
+join-channel.sh   [ORDERER_ADDRESS default=7050] [CHANNEL_NAME default=airlinechannel]
+                    Make sure to execute . set-env.sh before calling this scripy
+Using ORDERER_ADDRESS=localhost:7050
+2018-11-18 06:15:07.215 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:07.248 UTC [cli/common] readBlock -> INFO 002 Received block: 0
+2018-11-18 06:15:07.250 UTC [cli/common] readBlock -> INFO 003 Received block: 0
+2018-11-18 06:15:07.383 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:07.833 UTC [channelCmd] executeJoin -> INFO 002 Successfully submitted proposal to join channel
+++ acme-peer2 Launching & Joining airlinechannel - will sleep for 3 seconds
+Current Identity Context: acme     admin
+Switching IDENTITY Context to Org = acme  admin
+Setting PORT_NUMBER_BASE=8050
+Current Identity Context: acme     admin
+Switching IDENTITY Context to Org = acme  acme-peer2
+Setting PORT_NUMBER_BASE=8050
+====>PLEASE Check Peer Log under  ../acme-peer2.log
+====>Make sure there are no errors!!!
+join-channel.sh   [ORDERER_ADDRESS default=7050] [CHANNEL_NAME default=airlinechannel]
+                    Make sure to execute . set-env.sh before calling this scripy
+Using ORDERER_ADDRESS=localhost:7050
+2018-11-18 06:15:11.010 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:11.012 UTC [cli/common] readBlock -> INFO 002 Received block: 0
+2018-11-18 06:15:11.014 UTC [cli/common] readBlock -> INFO 003 Received block: 0
+2018-11-18 06:15:11.164 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:11.254 UTC [channelCmd] executeJoin -> INFO 002 Successfully submitted proposal to join channel
++ budget-peer1 Launching & Joining airlinechannel - will sleep for 3 seconds
+Current Identity Context: acme     admin
+Switching IDENTITY Context to Org = budget  admin
+Setting PORT_NUMBER_BASE=9050
+Current Identity Context: budget     admin
+Switching IDENTITY Context to Org = budget  budget-peer1
+Setting PORT_NUMBER_BASE=9050
+====>PLEASE Check Peer Log under  ../budget-peer1.log
+====>Make sure there are no errors!!!
+join-channel.sh   [ORDERER_ADDRESS default=7050] [CHANNEL_NAME default=airlinechannel]
+                    Make sure to execute . set-env.sh before calling this scripy
+Using ORDERER_ADDRESS=localhost:7050
+2018-11-18 06:15:14.406 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:14.409 UTC [cli/common] readBlock -> INFO 002 Received block: 0
+2018-11-18 06:15:14.410 UTC [cli/common] readBlock -> INFO 003 Received block: 0
+2018-11-18 06:15:14.525 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2018-11-18 06:15:14.565 UTC [channelCmd] executeJoin -> INFO 002 Successfully submitted proposal to join channel
+Done. All 3 peers launched in background. Please check peer logs at /peers
+vagrant@vagrant:/vagrant/peers/bins$ . set-env.sh acme 7050 admin
+Current Identity Context:
+Switching IDENTITY Context to Org = acme  admin
+Setting PORT_NUMBER_BASE=7050
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh install
+Setting the Orderer to localhost:7050
+CC Operation : install    for   Org: acme
+2018-11-18 06:18:48.297 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2018-11-18 06:18:48.297 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+2018-11-18 06:18:48.809 UTC [chaincodeCmd] install -> INFO 003 Installed remotely response:<status:200 payload:"OK" >
+Get installed chaincodes on peer:
+Name: nodecc, Version: 1.0, Path: ../../nodechaincode, Id: d9c602cee19d8674bb99057d9917426fd49c722331d945d780bf2024b226a0eb
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh instantiate
+Setting the Orderer to localhost:7050
+CC Operation : instantiate    for   Org: acme
+2018-11-18 06:19:28.565 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2018-11-18 06:19:28.565 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+
+Error: could not assemble transaction, err proposal response was not successful, error code 500, msg timeout expired while starting chaincode nodecc:1.0 for transaction
+vagrant@vagrant:/vagrant/peers/bins$
+vagrant@vagrant:/vagrant/peers/bins$
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh instantiate
+Setting the Orderer to localhost:7050
+CC Operation : instantiate    for   Org: acme
+2018-11-18 06:46:51.281 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2018-11-18 06:46:51.282 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+vagrant@vagrant:/vagrant/peers/bins$ peer chaincode list --instantiated -C airlinechannel
+Get instantiated chaincodes on channel airlinechannel:
+Name: nodecc, Version: 1.0, Path: ../../nodechaincode, Escc: escc, Vscc: vscc
+vagrant@vagrant:/vagrant/peers/bins$
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh query
+Setting the Orderer to localhost:7050
+CC Operation : query    for   Org: acme
+query a=100
+query b=200
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh invoke
+Setting the Orderer to localhost:7050
+CC Operation : invoke    for   Org: acme
+Invoke sending 5 token from a=>b
+2018-11-18 06:48:56.058 UTC [chaincodeCmd] InitCmdFactory -> INFO 001 Retrieved channel (airlinechannel) orderer endpoint: localhost:7050
+2018-11-18 06:48:56.068 UTC [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 002 Chaincode invoke successful. result: status:200
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh query
+Setting the Orderer to localhost:7050
+CC Operation : query    for   Org: acme
+query a=95
+query b=205
+vagrant@vagrant:/vagrant/peers/bins$ cd ../..
+vagrant@vagrant:/vagrant$ cd setup
+vagrant@vagrant:/vagrant/setup$ ./clean.sh
+===> Cleaning Fabric CA Server
+Killed the Fabric CA Server & Removed the identities!!!
+===> Cleaning Orderer
+./launch-orderer.sh: line 13:  3120 Terminated              orderer 2> ../orderer.log
+Done.
+To Relaunch execute ./gen-config.sh and then ./launch-orderer.sh
+===> Cleaning Peers
+Done.
+===> Cleaning Cloud folder
+Done. Cleans up only the local VM - manual clean up needed for Cloud VM!!
+===> Removing fabric components
+==> Done.
+1. To Remove VM. Please run the command   'vagrant destroy' on host machine
+2. To Re-install fabric use scripts under the setup folder.

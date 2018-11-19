@@ -1,0 +1,40 @@
+Last login: Sun Nov 18 06:05:10 2018 from 10.0.2.2
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+vagrant@vagrant:/vagrant/fabric-ca/bins$ . set-env.sh
+vagrant@vagrant:/vagrant/fabric-ca/bins$ fabric-ca-server init -b admin:adminpw
+2018/11/18 13:41:13 [INFO] Created default configuration file at /vagrant/fabric-ca/server/fabric-ca-server-config.yaml
+2018/11/18 13:41:13 [INFO] Server Version: 1.3.1
+2018/11/18 13:41:13 [INFO] Server Levels: &{Identity:1 Affiliation:1 Certificate:1 Credential:1 RAInfo:1 Nonce:1}
+2018/11/18 13:41:13 [WARNING] &{69 The specified CA certificate file /vagrant/fabric-ca/server/ca-cert.pem does not exist}
+2018/11/18 13:41:13 [INFO] generating key: &{A:ecdsa S:256}
+2018/11/18 13:41:13 [INFO] encoded CSR
+2018/11/18 13:41:13 [INFO] signed certificate with serial number 62866320090407527601896569053085933661493274609
+2018/11/18 13:41:13 [INFO] The CA key and certificate were generated for CA
+2018/11/18 13:41:13 [INFO] The key was stored by BCCSP provider 'SW'
+2018/11/18 13:41:13 [INFO] The certificate is at: /vagrant/fabric-ca/server/ca-cert.pem
+2018/11/18 13:41:13 [INFO] Initialized sqlite3 database at /vagrant/fabric-ca/server/fabric-ca-server.db
+2018/11/18 13:41:13 [INFO] The issuer key was successfully stored. The public key is at: /vagrant/fabric-ca/server/IssuerPublicKey, secret key
+is at: /vagrant/fabric-ca/server/msp/keystore/IssuerSecretKey
+2018/11/18 13:41:13 [INFO] Idemix issuer revocation public and secret keys were generated for CA ''
+2018/11/18 13:41:13 [INFO] The revocation key was successfully stored. The public key is at: /vagrant/fabric-ca/server/IssuerRevocationPublicKey, private key is at: /vagrant/fabric-ca/server/msp/keystore/IssuerRevocationPrivateKey
+2018/11/18 13:41:13 [INFO] Home directory for default CA: /vagrant/fabric-ca/server
+2018/11/18 13:41:13 [INFO] Initialization was successful
+vagrant@vagrant:/vagrant/fabric-ca/bins$ ./launch-caserver
+-bash: ./launch-caserver: No such file or directory
+vagrant@vagrant:/vagrant/fabric-ca/bins$ ./launch-caserver.sh
+2018/11/18 13:44:51 [INFO] Configuration file location: /vagrant/fabric-ca/server/fabric-ca-server-config.yaml
+2018/11/18 13:44:51 [INFO] Starting server in home directory: /vagrant/fabric-ca/server
+2018/11/18 13:44:51 [INFO] Server Version: 1.3.1
+2018/11/18 13:44:51 [INFO] Server Levels: &{Identity:1 Affiliation:1 Certificate:1 Credential:1 RAInfo:1 Nonce:1}
+2018/11/18 13:44:51 [INFO] The CA key and certificate already exist
+2018/11/18 13:44:51 [INFO] The key is stored by BCCSP provider 'SW'
+2018/11/18 13:44:51 [INFO] The certificate is at: /vagrant/fabric-ca/server/ca-cert.pem
+2018/11/18 13:44:51 [INFO] Initialized sqlite3 database at /vagrant/fabric-ca/server/fabric-ca-server.db
+2018/11/18 13:44:51 [INFO] The Idemix issuer public and secret key files already exist
+2018/11/18 13:44:51 [INFO]    secret key file location: /vagrant/fabric-ca/server/msp/keystore/IssuerSecretKey
+2018/11/18 13:44:51 [INFO]    public key file location: /vagrant/fabric-ca/server/IssuerPublicKey
+2018/11/18 13:44:51 [INFO] The Idemix issuer revocation public and secret key files already exist
+2018/11/18 13:44:51 [INFO]    private key file location: /vagrant/fabric-ca/server/msp/keystore/IssuerRevocationPrivateKey
+2018/11/18 13:44:51 [INFO]    public key file location: /vagrant/fabric-ca/server/IssuerRevocationPublicKey
+2018/11/18 13:44:51 [INFO] Home directory for default CA: /vagrant/fabric-ca/server
+2018/11/18 13:44:51 [INFO] Listening on http://0.0.0.0:7054

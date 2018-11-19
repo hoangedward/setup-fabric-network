@@ -1,0 +1,229 @@
+Tutorial: Set up Multi Org Hyperledger Fabric Network
+https://www.udemy.com/tutorial-hyperledger-setup
+
+Advanced course: Hyperledger Fabric Network Design & Setup
+https://courses.pragmaticpaths.com/p/hyperledger-fabric/?coupon_code=HALFOFF
+
+Go to http://acloudfan.com/download-files
+	and download HLF-Workbench-v1.3-02
+	unzip with password: 11-10-2018
+
+============================ SET UP ===============================
+Open Visual Code at folder:
+D:\Hyperledger\NetworkSetupUdemy\HLF-Workbench-v1.3-02
+Type command:
+> code .
+
+In Visual Code, Open terminal
+Start the machine
+> vagrant up
+Login to the machine
+> vagrant ssh
+
+Setup prerequisite software:
+
+Docker:
+$ cd setup
+$ chmod 755 *.sh
+$ sudo ./docker.sh
+
+$ exit
+
+> vagrant ssh
+$ docker version
+Client:
+ Version:           18.09.0
+Engine:
+ Version:          18.09.0
+
+Fabric
+$ cd setup
+$ sudo ./fabric-setup.sh
+$ orderer version
+	Version: 1.3.0
+$ peer version
+	Version: 1.3.0
+
+
+CA Server
+$ sudo ./caserver-setup.sh
+$ fabric-ca-server version
+Version: 1.3.1
+ Go version: go1.10.4
+$ fabric-ca-client version
+Version: 1.3.1
+ Go version: go1.10.4
+
+================== Workbench folders overview ======================
+artefacts
+bin
+cloud
+composer
+	cards
+	test
+config
+env
+fabric-ca
+	bins
+	client
+	server
+nodechaincode
+orderer
+peers
+setup
+Vagrantfile
+
+------------------------------------------
+Quick setup and test
+1. Setup CA Server & setup all of the identities
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+$ ./run-all-caserver.sh
+
+2. Generate configuration and launch Oderer
+vagrant@vagrant:/vagrant$ cd orderer/bins/
+$ ./run-all-orderer.sh
+
+3. Create the airlinechannel and launch peers
+vagrant@vagrant:/vagrant$ cd peers/bins/
+$ ./run-all-peers.sh
+
+4. Test
+vagrant@vagrant:/vagrant/peers/bins$ . set-env.sh acme 7050 admin
+	Current Identity Context:
+	Switching IDENTITY Context to Org = acme  admin
+	Setting PORT_NUMBER_BASE=7050
+s$ ./chain-test.sh install
+$ ./chain-test.sh instantiate
+	(Note that can be time-out and we need to re-execute the command)
+$ peer chaincode list --instantiated -C airlinechannel
+	Get instantiated chaincodes on channel airlinechannel:
+	Name: nodecc, Version: 1.0, Path: ../../nodechaincode, Escc: escc, Vscc: vscc
+$ ./chain-test.sh query
+$ ./chain-test.sh invoke
+$ ./chain-test.sh query
+
+Clean up:
+At component level or At Workbench level
+./setup/clean.sh
+vagrant@vagrant:/vagrant$ cd setup
+$ ./clean.sh
+
+--- Detail log, see at: Memo-Run-All-In-One.txt
+
+--------------3. Setup the Fabric Network Identities------------------
+Identites management using Fabric CA
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+$ ./init-fabric-ca.sh
+$ ./launch-caserver.sh
+
+There are some usefull scripts under fabric-ca/bins/:
+clean.sh: clean all ca info under server and client folders
+init-fabric-ca.sh: initialized and enroll CA Registrar admin
+****** set-client-home.sh ORG_NAME ENROLL_ID: after that, the Fabric CA Client binary will be executed under context of that ORG_NAME and ENROLL_ID
+$ . set-client-home.sh caserver admin
+	FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/caserver/admin
+$ fabric-ca-client identity list
+Name: admin, Type: client, Affiliation: , Max Enrollments: -1, Attributes: [{Name:hf.AffiliationMgr Value:1 ECert:false} {Name:hf.Registrar.Roles Value:* ECert:false} {Name:hf.Registrar.DelegateRoles Value:* ECert:false} {Name:hf.Revoker Value:1 ECert:false} {Name:hf.IntermediateCA Value:1 ECert:false} {Name:hf.GenCRL Value:1 ECert:false} {Name:hf.Registrar.Attributes Value:* ECert:false}]
+
+gen-admin-identities.sh: generate identities for admin of org
+gen-orderer-identity.sh: generate identities for orderer
+gen-peer-identity.sh: generate identities for peer
+create-org-msp.sh: needed for network configuration
+
+--------------- Organization Admin Identities ---------------
+Each org must have at least 1 org admin
+$ ./gen-admin-identities.sh
+
+Test
+$ . set-client-home.sh acme admin
+	FABRIC_CA_CLIENT_HOME=/vagrant/fabric-ca/bins/../client/acme/admin
+$ fabric-ca-client identity list
+Name: acme-admin, Type: client, Affiliation: acme, Max Enrollments: -1, Attributes: [{Name:hf.AffiliationMgr Value:true ECert:false} {Name:hf.Revoker Value:true ECert:false} {Name:hf.Registrar.Roles Value:peer,user,client ECert:false} {Name:hf.EnrollmentID Value:acme-admin ECert:true}
+{Name:hf.Type Value:client ECert:true} {Name:hf.Affiliation Value:acme ECert:true}]
+
+
+--------------- Organization MSP Setup ---------------
+Each identities has their MPS
+An Organization has Organization MSP is used for Blockchain network configuration (such as provided in Genesis Block)
+
+$ ./create-org-msp.sh
+After that, under fabric-ca\client\{OrgName}\ will have msp folder
+
+---------------4. Network Configuration & Setting up the Orderer ---------------
+Network configuration elements
+- Organization
+- Odering Service
+- Peer. Each org must have at least 1 Anchor Peer
+- Policy
+Config file: config\configtx.yaml contains profile for genesis block (ordererchannel) and app channel
+
+Using configtxgen to gen config from yaml file
+Start VM and start CA Server
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/ $ ./launch-caserver.sh
+(CA Server default port: 7050)
+
+Open new terminal:
+vagrant@vagrant:/vagrant$ cd orderer/bins/
+$ ./gen-config.sh
+Then we can see there are two files generated in artefacts folder:
+- airline-channel.tx (system channel / orderer channel)
+- airline-genesis.block (genesis block for network)
+
+Oderer setup:
+There are two messaging merchanism:
+- Solo (default in Fabric)
+- Kafka cluster to support multiple instance of orderer (suitable for production mode)
+
+Orderer default port: 7050
+
+Setup Orderer identity:
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+$ ./gen-orderer-identity.sh
+Now under \fabric-ca\client\orderer folder, we can see another MSP folder for orderer identity
+
+vagrant@vagrant:/vagrant/orderer/bins$ ./launch-orderer.sh
+Check log file: \orderer\orderer.log to see
+[orderer/common/server] Start -> INFO 013 [0m Beginning to serve requests
+We can press Ctrl+C to kill the orderer process
+
+Or we can run orderer in the background:
+vagrant@vagrant:/vagrant/orderer/bins$ ./launch-orderer.sh &
+Check:
+$ ps
+to see PID orderer
+
+To stop orderer:
+vagrant@vagrant:/vagrant/orderer/bins$ ./stop-all.sh
+
+
+--------------- 5. Setup the Peers ---------------
+Start CA Server:
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/ $ ./launch-caserver.sh
+
+Start Orderer:
+vagrant@vagrant:/vagrant/orderer/bins$ ./launch-orderer.sh &
+
+
+
+
+------------------------------------------
+Steps to setup a multi orgs network:
+	Setup CA Server and identities
+	Launch CA Server
+	Generate configuration and launch Orderer
+	Create Channel
+	Launch Peers
+We can clean up environment by Components level or Workbench level:
+Full clean:
+./setup/clean.sh all
+Then we can update Farbic libraries in case of needed
+
+---------------- Step By Step -----------------
+
+
+
+
+
+
+
+
