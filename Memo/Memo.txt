@@ -198,31 +198,146 @@ vagrant@vagrant:/vagrant/orderer/bins$ ./stop-all.sh
 
 --------------- 5. Setup the Peers ---------------
 Start CA Server:
-vagrant@vagrant:/vagrant$ cd fabric-ca/bins/ $ ./launch-caserver.sh
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/ 
+$ ./launch-caserver.sh
 
 Start Orderer:
-vagrant@vagrant:/vagrant/orderer/bins$ ./launch-orderer.sh &
+vagrant@vagrant:/vagrant$ cd orderer/bins/
+$ ./launch-orderer.sh &
+
+Step:
+	Create channel
+	Launch the peers
+	Join the channel
+Configuration file in \peers\core.yaml
+Peers base port:
+acme: 7050
+budget: 9050
+
+Create channel:
+Open new terminal and login to VM
+vagrant@vagrant:/vagrant$ cd peers/bins/
+$ . set-env.sh acme
+	Current Identity Context:
+	Switching IDENTITY Context to Org = acme  admin
+	Setting PORT_NUMBER_BASE=7050
+$ ./show-env.sh
+
+$ ./create-channel.sh
+Then we will see file:
+peers\airlinechannel-genesis.block
+
+Create Peer identity:
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+$ . set-client-home.sh acme admin
+$ ./gen-peer-identity.sh acme acme-peer1
+Check path: fabric-ca\client\acme\acme-peer1
+
+Launch the peer:
+vagrant@vagrant:/vagrant$ cd peers/bins/
+$ . set-env.sh acme 7050 admin
+$ ./launch-peer.sh acme 7050 acme-peer1
+Check file: peers\acme-peer1.log
+
+$ ./show-env.sh
+Current Identity Context:  acme   admin
+=========================
+CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+CORE_PEER_LOCALMSPID=AcmeMSP
+CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+CORE_PEER_MSPCONFIGPATH=/vagrant/peers/bins/../../fabric-ca/client/acme/admin/msp
+CORE_PEER_EVENTS_ADDRESS=0.0.0.0:7053
+CORE_PEER_ADDRESS=0.0.0.0:7051
+FABRIC_CFG_PATH=/vagrant/peers/bins/..
+Fabric Processes
+================
+0 S  1000  1785     1  2  80   0 - 47040 futex_ pts/2    00:00:01 peer
+0 S  1000  1699  1698  0  80   0 - 56528 futex_ pts/1    00:00:00 orderer
+0 S  1000  1654  1653  0  80   0 - 68092 futex_ pts/0    00:00:00 fabric-ca-serve
+
+Join the channel
+vagrant@vagrant:/vagrant/peers/bins$ ./join-channel.sh
+
+Check:
+$ peer channel list
+2018-11-20 13:51:39.725 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+Channels peers has joined:
+airlinechannel
+
+Test chaincode on peer:
+Step:
+Org admin install chaincode on the peers: compile and save to file system of peer
+Then instantiate the chaincode: launch Docker container to launch the chaincode
+(For now, we don't know about Endorsing Peer)
+
+Use nodechaincode\chaincode_example02.js for example.
+
+vagrant@vagrant:/vagrant/peers/bins$ . set-env.sh acme 7050 admin
+
+$ ./chain-test.sh install
+
+$ ./chain-test.sh instantiate
+
+$ peer chaincode list --instantiated -C airlinechannel
+
+Test
+$ ./chain-test.sh query
+$ ./chain-test.sh invoke
+$ ./chain-test.sh query
+
+Open new TERMINAL
+Adding a non-anchor peer:
+CA
+vagrant@vagrant:/vagrant/fabric-ca/bins$ . set-client-home.sh acme admin
+$ ./gen-peer-identity.sh acme acme-peer2
+
+Launch the peer
+$ ./launch-peer.sh acme 8050 acme-peer2
+Check: peers\acme-peer2.log
+
+Join the channel
+$ . set-env.sh acme 8050 admin
+$ ./join-channel.sh
+
+$ ./show-env.sh
+Current Identity Context:  acme   admin
+=========================
+CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:8052
+CORE_PEER_LOCALMSPID=AcmeMSP
+CORE_PEER_LISTENADDRESS=0.0.0.0:8051
+CORE_PEER_MSPCONFIGPATH=/vagrant/peers/bins/../../fabric-ca/client/acme/admin/msp
+CORE_PEER_EVENTS_ADDRESS=0.0.0.0:8053
+CORE_PEER_ADDRESS=0.0.0.0:8051
+FABRIC_CFG_PATH=/vagrant/peers/bins/..
+Fabric Processes
+================
+0 S  1000  1785     1  1  80   0 - 69253 futex_ pts/2    00:00:18 peer
+0 S  1000  1998     1  1  80   0 - 69269 ep_pol pts/2    00:00:03 peer
+0 S  1000  1699  1698  0  80   0 - 56528 futex_ pts/1    00:00:00 orderer
+0 S  1000  1654  1653  0  80   0 - 68092 futex_ pts/0    00:00:00 fabric-ca-serve
+
+Test
+vagrant@vagrant:/vagrant/peers/bins$ ./chain-test.sh install
+$ ./chain-test.sh query
+
+Open new TERMINAL
+Setup Anchor peer for Budger Organization
+On base port 9050
+Do the same...
+
+To clean up all peers:
+vagrant@vagrant:/vagrant/peers/bins$ ./clean.sh
+
+----------------------------------------------------------------------------
+-------- 6. Install & Test Composer Application in multi org setup ---------
+----------------------------------------------------------------------------
 
 
 
 
-------------------------------------------
-Steps to setup a multi orgs network:
-	Setup CA Server and identities
-	Launch CA Server
-	Generate configuration and launch Orderer
-	Create Channel
-	Launch Peers
-We can clean up environment by Components level or Workbench level:
-Full clean:
-./setup/clean.sh all
-Then we can update Farbic libraries in case of needed
-
----------------- Step By Step -----------------
-
-
-
-
+----------------------------------------------------------------------------
+-- 7. Setting up Multi Org (multi VM) Fabric infrastructure on the Cloud ---
+----------------------------------------------------------------------------
 
 
 
