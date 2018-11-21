@@ -7,6 +7,18 @@ https://courses.pragmaticpaths.com/p/hyperledger-fabric/?coupon_code=HALFOFF
 Go to http://acloudfan.com/download-files
 	and download HLF-Workbench-v1.3-02
 	unzip with password: 11-10-2018
+	
+Failed to build python?
+MSBUILD : error MSB3428: Could not load the Visual C++ component "VCBuild.exe". To fix this, 1) install the .NET Framework 2.0 SDK, 2) install
+ Microsoft Visual Studio 2005 or 3) add the location of the component to the system path if it is installed elsewhere.
+	npm install --global --production windows-build-tools
+	npm install --global node-gyp
+	
+Install yo
+> npm install --global yo
+> npm install --global generator-hyperledger-composer
+Verify
+> yo --generators
 
 ============================ SET UP ===============================
 Open Visual Code at folder:
@@ -195,8 +207,9 @@ to see PID orderer
 To stop orderer:
 vagrant@vagrant:/vagrant/orderer/bins$ ./stop-all.sh
 
-
---------------- 5. Setup the Peers ---------------
+----------------------------------------------------------------------------
+--------------------------- 5. Setup the Peers ---------------------------
+----------------------------------------------------------------------------
 Start CA Server:
 vagrant@vagrant:/vagrant$ cd fabric-ca/bins/ 
 $ ./launch-caserver.sh
@@ -204,6 +217,8 @@ $ ./launch-caserver.sh
 Start Orderer:
 vagrant@vagrant:/vagrant$ cd orderer/bins/
 $ ./launch-orderer.sh &
+
+--------------- Create Channel ---------------
 
 Step:
 	Create channel
@@ -331,8 +346,132 @@ vagrant@vagrant:/vagrant/peers/bins$ ./clean.sh
 ----------------------------------------------------------------------------
 -------- 6. Install & Test Composer Application in multi org setup ---------
 ----------------------------------------------------------------------------
+Start CA Server:
+vagrant@vagrant:/vagrant$ cd fabric-ca/bins/
+$ ./launch-caserver.sh
 
+Start Orderer:
+vagrant@vagrant:/vagrant$ cd orderer/bins/
+$ ./launch-orderer.sh &
 
+(No need to Create channel again)
+Below error will cause if we try to create the same channel again
+Error: got unexpected status: BAD_REQUEST -- error authorizing update: error validating ReadSet: readset expected key [Group]  /Channel/Application at version 0, but got version 1
+
+Peers:
+vagrant@vagrant:/vagrant$ cd peers/bins/
+$ . set-env.sh acme 7050 admin
+$ ./join-channel.sh
+$ . set-env.sh acme 7050 admin
+$ ./chain-test.sh install
+$ ./chain-test.sh instantiate
+$ peer chaincode list --instantiated -C airlinechannel
+$ ./chain-test.sh query
+
+Composer
+composer\test: test application
+composer\cards: peer admin cards for setup
+composer\utils: node based util code
+
+Step:
+	Setup a test composer BNA
+	Setup network cards for PeerAdmins
+	Install, Start & Test Composer Application
+All Composer command is executed from Host machine CLI
+
+Open new Termnial
+(Stay at CMD, DON'T SSH to VM)
+
+> cd .\composer\test
+> yo hyperledger-composer
+
+Type of project: Business Network
+Empty template network?: No
+
+> cd .\test-bna
+> npm install
+
+> cd dist
+> composer archive create --sourceType dir --sourceName ../
+> ls
+
+Peer admin: admin of node
+Network admin: admin of app level. Setup by peer admin
+
+Peer admin install composer applications and network admin identites.
+Network admin can issue identities for participant
+
+To interact with Composer application (runtime), all participants need business card (credentials, Keys & Certificates, Connection profile) installed in local machine
+
+Card is used by API, Composer tools
+
+Storage of card:
+User home folder: ~/.composer
+
+In env folder, there are two files:
+- single-org
+- multi-org
+
+Generate Peer Admin Card
+
+> cd .\composer\util
+> npm install
+
+> node .\card-ops.js
+
+Select >.. generate admin card for multiple org
+
+Check in composer\cards folder, there are 3 cards generated
+
+> node .\card-ops.js
+Select >.. Install/Replace...
+
+> composer card list
+There are 3 cards list up
+
+Install Business Network
+- Install and Start test BNA on acme-peer1
+- Import the Network Admin Card
+- Launch the REST Server & Test
+
+> cd composer\test\test-bna\dist
+> composer network install -a test-bna@0.0.1.bna -c Acme-peer1PeerAdmin@hlfv1
+
+> composer network start -n test-bna -c Acme-peer1PeerAdmin@hlfv1 -V 0.0.1 -A acme-admin -S pw
+
+> ls
+
+Come back to PEER acme TERMINAL
+vagrant@vagrant:/vagrant$ cd peers/bins/
+$ . set-env.sh acme 7050 admin
+
+$ peer chaincode list --installed
+
+$ peer chaincode list --instatiated -C airlinechannel
+
+Switch to HOST CMD
+> composer card import -f .\peer1-acme-admin@test-bna.card
+> composer card list
+
+Composer REST Server
+> composer-rest-server -c acme-admin@test-bna
+
+Go to browser at:
+localhost:3000
+
+Composer for multiple org:
+
+> cd .\composer\util
+> node .\replicate-networkadmin-cards.js multi-org.yaml
+
+> composer card list
+
+Then we can use rest server card for rest server
+> composer-rest-server -c restserver-acme-admin@test-bna
+
+REST Server is now connect to any peer
+
+localhost:3000
 
 
 ----------------------------------------------------------------------------
