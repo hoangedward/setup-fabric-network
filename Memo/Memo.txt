@@ -8,9 +8,12 @@ Go to http://acloudfan.com/download-files
 	and download HLF-Workbench-v1.3-02
 	unzip with password: 11-10-2018
 	
+Using node v8.13.0-x64
+	
 Failed to build python?
 MSBUILD : error MSB3428: Could not load the Visual C++ component "VCBuild.exe". To fix this, 1) install the .NET Framework 2.0 SDK, 2) install
  Microsoft Visual Studio 2005 or 3) add the location of the component to the system path if it is installed elsewhere.
+ *** Open PowerShell as Administrator and install below:
 	npm install --global --production windows-build-tools
 	npm install --global node-gyp
 	
@@ -477,7 +480,177 @@ localhost:3000
 ----------------------------------------------------------------------------
 -- 7. Setting up Multi Org (multi VM) Fabric infrastructure on the Cloud ---
 ----------------------------------------------------------------------------
+Pre-requisites & Tools:
+
+Secure File Transfers: FileZilla
+SSH: GitBash
+
+All artefact will be in .\cloud folder
+
+--------------------- MSP Setup ---------------------
+Assume that we have generated identities for all peers on local workbench
+
+--------------------- Cloud VM Setup and Config IP Address ---------------------
+Then create a VM on cloud for: Orderer, Acme Peer and Budger Peer
+Remember to setup Network Security rules to:
+	Allow all inbound connections
+	Allow all outbound connections
+Run the Cloud VM instance and remember for SSH connection and public IP address
+
+Edit below file:
+cloud\set-env.sh
+export ORDERER_ADDRESS=52.200.206.97:7050
+export ACME_EP=52.205.251.182:7051
+export BUDGET_EP=18.212.140.88:7051
+
+Edit below file:
+cloud\bins\peer\set-env.sh
+export ORDERER_ADDRESS=52.200.206.97:7050
+
+Edit below file:
+cloud\configtx.yaml
+Change all:
+	... Host: 18.212.140.88 ...
+	
+Generate genesis block and channel tx
+vagrant@vagrant:/vagrant/cloud$ ./gen-genesis-channeltx.sh
+
+Then we can see there are two files generated in cloud\artefacts folder:
+- airline-channel.tx (system channel / orderer channel)
+- airline-genesis.block (genesis block for network)
+
+--------------------- Setup Orderer on Cloud ---------------------
+
+Generate identities:
+vagrant@vagrant:/vagrant/cloud$ ./gen-crypto.sh orderer orderer
+
+Using FileZilla to transfer files to VM
+Copy below files to home folder of VM:
+	cloud\bins\orderer (binary file)
+	cloud\artefacts\airline-genesis.block
+	cloud\artefacts\orderer-orderer-msp.tar
+	cloud\bins\orderer\* (all files)
+SSH to VM
+$ chmod 755 orderer
+$ sudo mv orderer /usr/local/bin
+
+$ tar xvf orderer-orderer-msp.tar
+$ chmod 755 *.sh
+$ ./launch-orderer.sh
+
+--------------------- Setup Peer on Cloud ---------------------
+Generate identities:
+vagrant@vagrant:/vagrant/cloud$ ./gen-crypto.sh acme acme-peer1
+
+Using FileZilla to transfer files to VM
+Copy below files to home folder of VM:
+	cloud\bins\peer (binary file)
+	cloud\artefacts\airline-channel.tx
+	cloud\artefacts\acme-admin-msp.tar
+	cloud\artefacts\acme-acme-peer1-msp.tar
+	cloud\bins\peer\* (all files)
+
+SSH to VM
+$ chmod 755 peer
+$ sudo mv peer /usr/local/bin
+
+$ chmod 755 *.sh
+$ sudo ./docker.sh
+
+$ nano set-env.sh
+export CORE_PEER_LOCALMSPID=AcmeMSP
+Save it
+$ . set-env.sh
+
+$ tar xvf acme-admin-msp.tar
+$ tar xvf acme-admin-msp.tar
+
+$ ./create-airline-channel.sh
+
+Launch the peer and join the airline channel
+$ ./launch-peer.sh &
+$ ./join-airline-channel.sh
+$ peer channel list
+
+For Budger Peer, the same as Acme peer
+
+$ nano set-env.sh
+export CORE_PEER_LOCALMSPID=BudgerMSP
+export CORE_PEER_ID=budget-peer1
+Save it
+
+Testing
+Setup VM IP address in cloud\set-env.sh
+
+$ . set-env.sh acme
+$ ./show-env.sh
+
+$ peer channel list
+$ peer chaincode list --installed
+
+$ ./chain-test.sh install
+
+$ ./chain-test.sh invoke
+$ ./chain-test.sh query
 
 
+--------------------- Setup Fabric CA Server on Cloud ---------------------
+vagrant@vagrant:/vagrant/cloud$ ./gen-caserver-dump.sh
 
+Create Cloud VM for Fabric CA Server and get the public IP
+Update to:
+cloud\set-env.sh
+export CA_IP=54.173.103.244
+
+FTP to Cloud VM
+Copy below files to home folder of VM:
+	cloud\bins\fabric-ca-client (binary file)
+	cloud\bins\fabric-ca-server (binary file)
+	cloud\bins\fabric-ca\* (all files)
+	cloud\artefacts\caserver-dump.tar
+	
+$ chmod 755 fabric-ca-client
+$ chmod 755 fabric-ca-server
+$ sudo mv fabric-ca-* /usr/local/bin
+$ fabric-ca-server version
+
+$ tar xvf caserver-dump.tar
+
+$ chmod 755 *.sh
+
+$ ./launch-caserver.sh
+
+Verify
+$ ./ca-test.sh acme
+$ ./ca-test.sh caserver
+
+
+--------------------- Setup Composer App on Cloud/VM ---------------------
+Using HOST CLI to execute Composer command
+> node .\card-ops.js
+Select > Generate ... CLOUD multiple Org Profile
+
+> node .\card-ops.js
+Select > Install/Replace Peer Cards
+
+... For ther step, refer to: 6. Install & Test Composer Application in multi org setup
+
+
+----------------------------------------------------------------------------
+------------------------ 8. Thank you + Next steps -------------------------
+----------------------------------------------------------------------------
+Take a look at my Blog to checkout the go forward options to expand your Hyperledger knowledge.
+
+http://www.acloudfan.com/learn-blockchain
+
+
+If you are interested in learning Fabric Composer Development then consider my course:
+
+Discounted Course Link:  Blockchain Development on Hyperledger Fabric using Composer
+
+https://www.udemy.com/hyperledger/?couponCode=HLFABRIC11
+
+
+Edward,
+22/11/2018
 
